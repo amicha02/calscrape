@@ -32,8 +32,19 @@ col_head = ["dates","day_of_the_week",'explanation']
 df= pd.DataFrame(dict(zip(col_head,list(zip(*value_series)))))
 df = df.replace('', np.NaN)
 df = df.dropna()
-df.set_index('dates', inplace=True)
-print(df)
+#df.set_index('dates', inplace=True)
+#print(df)
+
+
+df['start_date'],df['end_date'] = df['dates'].str.split(' –',1).str
+df['start_date'] = df['start_date']+ ' 2018'
+calendar_dates = list(df['start_date'])
+calendar_dates[-1] = calendar_dates[-1].replace("2018",'')
+calendar_dates[-1] = calendar_dates[-1].replace(",",'')
+df.columns
+calendar_desc = list(df['explanation'])
+
+
 
 
 
@@ -50,28 +61,29 @@ credentials
 service = build('calendar','v3',credentials=credentials)
 result = service.calendarList().list().execute()
 calendar_id = result['items'][0]['id']
-
-string = 'December 28'
-type(parser.parse(string).strftime('%m-%d'))
-string = 'December 28'
-type(parser.parse(string).strftime('%m-%d'))
-
-
-
-#EVENT FORMAT
-event = {
-  'summary': 'Google I/O 2015',
+print(df.index)
+j=0
+for date in calendar_dates:
+    event_f = parser.parse(date).strftime('%Y-%m-%d')
+    event = {
+  'summary': calendar_desc[j],
   'description': 'Event',
   'start': {
-    'dateTime': '2020-09-19T09:00:00-07:00',
+    'dateTime': event_f+'T09:00:00-07:00',
     'timeZone': 'America/New_York',
   },
   'end': {
-    'dateTime': '2020-09-19T09:00:00-07:00',
+    'dateTime': event_f+'T09:00:00-07:00',
     'timeZone': 'America/New_York',
   },
 }
-created_calendar = service.events().insert(calendarId=calendar_id,body=event).execute()
+    created_calendar = service.events().insert(calendarId=calendar_id,body=event).execute()
+    j = j + 1
+
+
+
+
+
 
 
 
